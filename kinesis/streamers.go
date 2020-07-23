@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	consumer "github.com/harlow/kinesis-consumer"
+	"github.com/nicolasassi/kinestesia/receivers"
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/sync/semaphore"
-	"kinestesia/receivers"
 	"sync"
 )
 

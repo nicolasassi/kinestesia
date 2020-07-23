@@ -1,4 +1,4 @@
-module kinestesia
+module github.com/nicolasassi/kinestesia
 
 go 1.13
 
