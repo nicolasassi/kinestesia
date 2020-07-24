@@ -16,6 +16,10 @@ const (
 
 var once *sync.Once
 
+func init() {
+	once = new(sync.Once)
+}
+
 type Streaming interface {
 	Stream(ctx context.Context, receivers ...receivers.Receiver) error
 }
