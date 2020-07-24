@@ -14,6 +14,8 @@ const (
 	maxWorkersForReceivers = 20
 )
 
+var once *sync.Once
+
 type Streaming interface {
 	Stream(ctx context.Context, receivers ...receivers.Receiver) error
 }
@@ -68,9 +70,11 @@ func NewStreamer(ctx context.Context, streamName string, opts ...*Client) (*Stre
 func (s *Streamer) Stream(ctx context.Context, args ...receivers.Receiver) error {
 	errChan := make(chan error, 1)
 	for _, rec := range args {
-		go func(rec receivers.Receiver) {
-			errChan <- rec.Send(ctx)
-		}(rec)
+		once.Do(func() {
+			go func(rec receivers.Receiver) {
+				errChan <- rec.Send(ctx)
+			}(rec)
+		})
 	}
 	sem := semaphore.NewWeighted(int64(maxWorkersForReceivers))
 	go func() {
