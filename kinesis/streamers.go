@@ -120,6 +120,9 @@ func NewStreamers(ctx context.Context, args ...interface{}) (*Streamers, error) 
 	for _, arg := range args {
 		switch arg.(type) {
 		case string:
+			if arg.(string) == "" {
+				continue
+			}
 			streamNames = append(streamNames, arg.(string))
 		case *Client:
 			client = arg.(*Client)
