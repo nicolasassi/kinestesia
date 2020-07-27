@@ -112,6 +112,9 @@ func (c *Client) watch(ctx context.Context, results chan *pubsub.PublishResult) 
 	for result := range results {
 		go func(result *pubsub.PublishResult) {
 			_, err := result.Get(ctx)
+			if err == context.Canceled {
+				return
+			}
 			if err != nil {
 				c.errors <- fmt.Errorf("[PUBLISH]: %v", err)
 				return
