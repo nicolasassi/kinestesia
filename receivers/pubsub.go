@@ -5,8 +5,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/nicolasassi/kinestesia/translator"
 	"google.golang.org/api/option"
-	"strings"
 )
 
 type Client struct {
@@ -15,7 +15,7 @@ type Client struct {
 	topics []string
 	// Translator represents how should the incoming data be in the end of the process.
 	// If Translator is nil the data will go as it came to the receiver.
-	translator *Translator
+	translator *translator.Translator
 	stream chan []byte
 	errors chan error
 }
@@ -59,33 +59,16 @@ func (c Client) TranslationRequired() bool {
 // Only translated fields will be included in the final response, so even if no actual translation
 // is required the field name should be added:
 // ex: map["payload"] = "payload"
-func (c *Client) SetTranslation(reference map[string]string, sep string) {
-	c.translator = NewTranslator(sep)
-	var cntr int
-	for k, v := range reference {
-		c.translator.translationKeys[cntr] = strings.Split(k, c.translator.sep)
-		c.translator.translationValue[cntr] = v
-		cntr++
-	}
+func (c *Client) SetTranslation(t *translator.Translator) {
+	c.translator = t
 }
 
 func (c *Client) Translate(b []byte) ([]byte, error) {
 	var m map[string]interface{}
-	resp := map[string]interface{}{}
 	if err := json.Unmarshal(b, &m); err != nil {
 		return nil, err
 	}
-	for k, v := range m {
-		for tk, tv := range c.translator.translationKeys {
-			if tv[0] == k {
-				if len(tv) == 1 {
-					resp[c.translator.translationValue[tk]] = v
-					break
-				}
-				resp[c.translator.translationValue[tk]] = c.translator.Translate(v, tv[1:])
-			}
-		}
-	}
+	resp := c.translator.Translate(m)
 	b, err := json.Marshal(resp)
 	if err != nil {
 		return nil, err

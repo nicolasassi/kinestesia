@@ -3,6 +3,7 @@ package receivers
 import (
 	"cloud.google.com/go/pubsub"
 	"encoding/json"
+	translator2 "github.com/nicolasassi/kinestesia/translator"
 	"log"
 	"reflect"
 	"testing"
@@ -12,7 +13,7 @@ func TestClient_Translate(t *testing.T) {
 	type fields struct {
 		client     *pubsub.Client
 		topics     []string
-		translator *Translator
+		translator *translator2.Translator
 		stream     chan []byte
 		errors     chan error
 	}
@@ -34,7 +35,7 @@ func TestClient_Translate(t *testing.T) {
 		{"default", fields{
 			client:     nil,
 			topics:     nil,
-			translator: NewTranslator("."),
+			translator: translator2.NewTranslator("."),
 			stream:     nil,
 			errors:     nil,
 		},
@@ -63,7 +64,7 @@ func TestClient_Translate(t *testing.T) {
 		{"keyInSliceOfMap", fields{
 			client:     nil,
 			topics:     nil,
-			translator: NewTranslator("."),
+			translator: translator2.NewTranslator("."),
 			stream:     nil,
 			errors:     nil,
 		},
@@ -97,7 +98,7 @@ func TestClient_Translate(t *testing.T) {
 		{"valueInSlice", fields{
 			client:     nil,
 			topics:     nil,
-			translator: NewTranslator("."),
+			translator: translator2.NewTranslator("."),
 			stream:     nil,
 			errors:     nil,
 		},

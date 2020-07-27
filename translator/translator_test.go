@@ -1,4 +1,4 @@
-package receivers
+package translator
 
 import (
 	"reflect"
