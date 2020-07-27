@@ -8,10 +8,17 @@ import (
 
 var indexPattern = regexp.MustCompile(`^\[(\d+)]$`)
 
+type rule struct {
+	arg1 string
+	modifier string
+	arg2 string
+}
+
 type Translator struct {
 	translationKeys  map[int][]string
 	translationValue map[int]string
 	sep              string
+	rules []rule
 }
 
 func NewTranslator(sep string) *Translator {
@@ -23,6 +30,14 @@ func NewTranslator(sep string) *Translator {
 		translationValue: map[int]string{},
 		sep:              sep,
 	}
+}
+
+func (t *Translator) AddRule(arg1, modifier, arg2 string) {
+	t.rules = append(t.rules, rule{
+		arg1:     arg1,
+		modifier: modifier,
+		arg2:     arg2,
+	})
 }
 
 func (t Translator) Translate(m interface{}, keys []string) interface{} {
