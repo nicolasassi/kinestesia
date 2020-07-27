@@ -17,6 +17,7 @@ type Client struct {
 	// If Translator is nil the data will go as it came to the receiver.
 	translator *translator.Translator
 	stream chan []byte
+	sent chan struct{}
 	errors chan error
 }
 
@@ -29,6 +30,7 @@ func NewPubSubClient(ctx context.Context, projectID string, opts ...option.Clien
 		client: client,
 		name: "pubsub",
 		stream: make(chan []byte),
+		sent: make(chan struct{}),
 		errors: make(chan error, 1),
 	}, nil
 }
@@ -43,6 +45,7 @@ func (c *Client) AddTopics(topics ...string) {
 
 func (c *Client) AddMessage(b []byte) {
 	c.stream <- b
+	<-c.sent
 }
 
 func (c Client) TranslationRequired() bool {
@@ -99,6 +102,7 @@ func (c *Client) Send(ctx context.Context) error {
 					Data: message,
 				})
 				results <- r
+				c.sent <- struct{}{}
 			}
 		}
 	}
