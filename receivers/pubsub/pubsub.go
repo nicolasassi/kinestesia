@@ -1,4 +1,4 @@
-package receivers
+package pubsub
 
 import (
 	"cloud.google.com/go/pubsub"

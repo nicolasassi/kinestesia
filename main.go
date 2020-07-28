@@ -3,7 +3,7 @@ package kinestesia
 import (
 	"context"
 	"github.com/nicolasassi/kinestesia/kinesis"
-	"github.com/nicolasassi/kinestesia/receivers"
+	"github.com/nicolasassi/kinestesia/receivers/pubsub"
 	"log"
 	"os"
 )
@@ -22,7 +22,7 @@ func main() {
 		log.Fatal(err)
 	}
 	log.Println("starting pubsub receiver...")
-	pbs, err := receivers.NewPubSubClient(cctx, os.Getenv("PROJECT_ID"))
+	pbs, err := pubsub.NewPubSubClient(cctx, os.Getenv("PROJECT_ID"))
 	if err != nil {
 		log.Fatal(err)
 	}
