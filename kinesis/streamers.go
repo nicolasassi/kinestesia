@@ -98,7 +98,9 @@ func (s *Streamer) Stream(ctx context.Context, args ...receivers.Receiver) error
 						if err != nil {
 							errChan <- fmt.Errorf("receiver service %s error: %v", rec.String(), err)
 						}
-						rec.AddMessage(translated)
+						if translated != nil {
+							rec.AddMessage(translated)
+						}
 						return
 					}
 					rec.AddMessage(data)
