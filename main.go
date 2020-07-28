@@ -2,6 +2,8 @@ package kinestesia
 
 import (
 	"context"
+	consumer "github.com/harlow/kinesis-consumer"
+	store "github.com/harlow/kinesis-consumer/store/redis"
 	"github.com/nicolasassi/kinestesia/kinesis"
 	"github.com/nicolasassi/kinestesia/receivers/pubsub"
 	"log"
@@ -17,7 +19,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	s, err := kinesis.NewStreamer(cctx, os.Getenv("STREAM_NAME"), client)
+	cstore, err := store.New("", store.WithClient())
+	if err != nil {
+		log.Fatal(err)
+	}
+	s, err := kinesis.NewStreamer(cctx, os.Getenv("STREAM_NAME"),
+		consumer.WithClient(client.Kinesis), consumer.WithStore(cstore))
 	if err != nil {
 		log.Fatal(err)
 	}

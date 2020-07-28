@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/nicolasassi/kinestesia/translator"
 	"google.golang.org/api/option"
-	"log"
 )
 
 type Client struct {

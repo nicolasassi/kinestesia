@@ -33,23 +33,10 @@ type streamController struct {
 	err error
 }
 
-func NewStreamer(ctx context.Context, streamName string, opts ...*Client) (*Streamer, error) {
-	var client *Client
-	switch len(opts) {
-	case 0:
-		c, err := NewClient(ctx)
-		if err != nil {
-			return nil, err
-		}
-		client = c
-	case 1:
-		client = opts[0]
-	default:
-		return nil, fmt.Errorf("opts should be 1 or 0 not %v", len(opts))
-	}
+func NewStreamer(ctx context.Context, streamName string, opts ...consumer.Option) (*Streamer, error) {
 	controller := make(chan streamController, 1)
 	go func() {
-		c, err := consumer.New(streamName, consumer.WithClient(client.Kinesis))
+		c, err := consumer.New(streamName, opts...)
 		if err != nil {
 			controller <- streamController{
 				err: fmt.Errorf("new consumer error: %v", err),
@@ -121,7 +108,7 @@ type Streamers []*Streamer
 
 func NewStreamers(ctx context.Context, args ...interface{}) (*Streamers, error) {
 	var streamNames []string
-	var client *Client
+	var opts []consumer.Option
 	var streamers Streamers
 	for _, arg := range args {
 		switch arg.(type) {
@@ -130,8 +117,8 @@ func NewStreamers(ctx context.Context, args ...interface{}) (*Streamers, error) 
 				continue
 			}
 			streamNames = append(streamNames, arg.(string))
-		case *Client:
-			client = arg.(*Client)
+		case consumer.Option:
+			opts = append(opts, arg.(consumer.Option))
 		}
 	}
 	g := new(errgroup.Group)
@@ -139,15 +126,13 @@ func NewStreamers(ctx context.Context, args ...interface{}) (*Streamers, error) 
 	for _, streamName := range streamNames {
 		func(streamName string) {
 			g.Go(func() error {
-				if client != nil {
-					streamer, err := NewStreamer(ctx, streamName, client)
-					if err != nil {
-						return err
-					}
-					locker.Lock()
-					defer locker.Unlock()
-					streamers = append(streamers, streamer)
+				streamer, err := NewStreamer(ctx, streamName, opts...)
+				if err != nil {
+					return err
 				}
+				locker.Lock()
+				defer locker.Unlock()
+				streamers = append(streamers, streamer)
 				return nil
 			})
 		}(streamName)
