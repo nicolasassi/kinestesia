@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/nicolasassi/kinestesia/translator"
 	"google.golang.org/api/option"
+	"log"
 )
 
 type Client struct {
@@ -104,6 +105,7 @@ func (c *Client) Send(ctx context.Context) error {
 				r := topic.Publish(ctx, &pubsub.Message{
 					Data: message,
 				})
+				log.Printf("sent: %v", string(message))
 				results <- r
 				c.sent <- struct{}{}
 			}
