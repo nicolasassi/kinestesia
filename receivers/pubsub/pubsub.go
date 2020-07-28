@@ -88,6 +88,7 @@ func (c *Client) Send(ctx context.Context) error {
 		topic := c.client.Topic(topicID)
 		topics = append(topics, topic)
 	}
+	
 	results := make(chan *pubsub.PublishResult)
 	go c.watch(ctx, results)
 	for {
