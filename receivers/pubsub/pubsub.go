@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/nicolasassi/kinestesia/translator"
 	"google.golang.org/api/option"
+	"log"
 )
 
 type Client struct {
@@ -23,6 +24,7 @@ type Client struct {
 
 func NewPubSubClient(ctx context.Context, projectID string, opts ...option.ClientOption) (*Client, error) {
 	client, err := pubsub.NewClient(ctx, projectID, opts...)
+	log.Printf("aaaaaaaaa")
 	if err != nil {
 		return nil, fmt.Errorf("new pubsub client error: %v", err)
 	}
@@ -88,7 +90,7 @@ func (c *Client) Send(ctx context.Context) error {
 		topic := c.client.Topic(topicID)
 		topics = append(topics, topic)
 	}
-	
+
 	results := make(chan *pubsub.PublishResult)
 	go c.watch(ctx, results)
 	for {
