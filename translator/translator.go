@@ -56,7 +56,7 @@ func (t *Translator) AddFilterRule(arg1, modifier string, arg2 interface{}) {
 	})
 }
 
-func (t *Translator) translate(m interface{}, keys []string) interface{} {
+func (t Translator) translate(m interface{}, keys []string) interface{} {
 	key := keys[0]
 	rt := reflect.TypeOf(m)
 	switch rt.Kind() {
