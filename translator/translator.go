@@ -125,7 +125,7 @@ func (t Translator) Translate(obj ObjectJSON) *ObjectJSON {
 			resp[k] = v
 		}
 	}
-	for k, v := range obj {
+	for k, v := range resp {
 		if !t.filter(k, v) {
 			return nil
 		}
