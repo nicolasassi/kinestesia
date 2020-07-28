@@ -3,7 +3,7 @@ package receivers
 import (
 	"cloud.google.com/go/pubsub"
 	"encoding/json"
-	translator2 "github.com/nicolasassi/kinestesia/translator"
+	"github.com/nicolasassi/kinestesia/translator"
 	"log"
 	"reflect"
 	"testing"
@@ -13,7 +13,7 @@ func TestClient_Translate(t *testing.T) {
 	type fields struct {
 		client     *pubsub.Client
 		topics     []string
-		translator *translator2.Translator
+		translator *translator.Translator
 		stream     chan []byte
 		errors     chan error
 	}
@@ -35,7 +35,6 @@ func TestClient_Translate(t *testing.T) {
 		{"default", fields{
 			client:     nil,
 			topics:     nil,
-			translator: translator2.NewTranslator("."),
 			stream:     nil,
 			errors:     nil,
 		},
@@ -60,11 +59,10 @@ func TestClient_Translate(t *testing.T) {
 				},
 				sep: ".",
 			},
-			[]byte(`{"aa":"a","cd":1}`), false},
+			[]byte(`{"aa":"a","b":"b","cd":1}`), false},
 		{"keyInSliceOfMap", fields{
 			client:     nil,
 			topics:     nil,
-			translator: translator2.NewTranslator("."),
 			stream:     nil,
 			errors:     nil,
 		},
@@ -94,11 +92,10 @@ func TestClient_Translate(t *testing.T) {
 				},
 				sep: ".",
 			},
-			[]byte(`{"aa":"a","chi":1}`), false},
+			[]byte(`{"aa":"a","b":"b","chi":1}`), false},
 		{"valueInSlice", fields{
 			client:     nil,
 			topics:     nil,
-			translator: translator2.NewTranslator("."),
 			stream:     nil,
 			errors:     nil,
 		},
@@ -130,7 +127,7 @@ func TestClient_Translate(t *testing.T) {
 			},
 			sep: ".",
 		},
-			[]byte(`{"aa":"a","chi":1,"j":2}`), false},
+			[]byte(`{"aa":"a","b":"b","chi":1,"j":2}`), false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -141,7 +138,7 @@ func TestClient_Translate(t *testing.T) {
 				stream:     tt.fields.stream,
 				errors:     tt.fields.errors,
 			}
-			c.SetTranslation(tt.reference.ref, tt.reference.sep)
+			c.SetTranslation(translator.NewTranslator(tt.reference.ref, tt.reference.sep))
 			got, err := c.Translate(tt.args.b)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Translate() error = %v, wantErr %v", err, tt.wantErr)
