@@ -72,11 +72,14 @@ func (c *Client) Translate(b []byte) ([]byte, error) {
 		return nil, err
 	}
 	resp := c.translator.Translate(m)
-	b, err := json.Marshal(resp)
+	if resp == nil {
+		return nil, nil
+	}
+	bb, err := json.Marshal(resp)
 	if err != nil {
 		return nil, err
 	}
-	return b, nil
+	return bb, nil
 }
 
 func (c *Client) Send(ctx context.Context) error {
