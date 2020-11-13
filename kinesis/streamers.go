@@ -7,7 +7,6 @@ import (
 	"github.com/nicolasassi/kinestesia/receivers"
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/sync/semaphore"
-	"log"
 	"sync"
 )
 
@@ -67,14 +66,12 @@ func (s *Streamer) Stream(ctx context.Context, args ...receivers.Receiver) error
 	go func() {
 		sem := semaphore.NewWeighted(int64(maxWorkersForReceivers))
 		errChan <- s.c.Scan(ctx, func(r *consumer.Record) error {
-			log.Println("Go here once more")
 			for _, rec := range args {
 				if err := sem.Acquire(ctx, 1); err != nil {
 					errChan <- err
 					break
 				}
 				go func(rec receivers.Receiver, data []byte) {
-					log.Println("And here once more")
 					defer sem.Release(1)
 					if rec.TranslationRequired() {
 						translated, err := rec.Translate(data)
@@ -89,13 +86,15 @@ func (s *Streamer) Stream(ctx context.Context, args ...receivers.Receiver) error
 					}
 					rec.AddMessage(data)
 				}(rec, r.Data)
+				if ctx.Err() != nil {
+					return ctx.Err()
+				}
 			}
-			return nil // continue scanning
+			return ctx.Err() // continue scanning if ctx not done
 		})
 	}()
 	select {
 	case <-ctx.Done():
-		log.Printf("Done Stream")
 		return nil
 	case err := <-errChan:
 		return err
