@@ -54,7 +54,7 @@ func NewStreamer(ctx context.Context, streamName string, opts ...consumer.Option
 	}
 }
 
-func (s *Streamer) Stream(ctx context.Context, args ...receivers.Receiver) error {
+func (s Streamer) Stream(ctx context.Context, args ...receivers.Receiver) error {
 	errChan := make(chan error, 1)
 	for _, rec := range args {
 		once.Do(func() {
