@@ -7,6 +7,7 @@ import (
 	"github.com/nicolasassi/kinestesia/receivers"
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/sync/semaphore"
+	"log"
 	"sync"
 )
 
@@ -14,11 +15,7 @@ const (
 	maxWorkersForReceivers = 20
 )
 
-var once *sync.Once
-
-func init() {
-	once = new(sync.Once)
-}
+var once sync.Once
 
 type Streaming interface {
 	Stream(ctx context.Context, receivers ...receivers.Receiver) error
@@ -67,23 +64,23 @@ func (s *Streamer) Stream(ctx context.Context, args ...receivers.Receiver) error
 			}(rec)
 		})
 	}
-	sem := semaphore.NewWeighted(int64(maxWorkersForReceivers))
 	go func() {
-		wg := new(sync.WaitGroup)
+		sem := semaphore.NewWeighted(int64(maxWorkersForReceivers))
 		errChan <- s.c.Scan(ctx, func(r *consumer.Record) error {
+			log.Println("Go here once more")
 			for _, rec := range args {
 				if err := sem.Acquire(ctx, 1); err != nil {
 					errChan <- err
 					break
 				}
-				wg.Add(1)
 				go func(rec receivers.Receiver, data []byte) {
-					defer wg.Done()
+					log.Println("And here once more")
 					defer sem.Release(1)
 					if rec.TranslationRequired() {
 						translated, err := rec.Translate(data)
 						if err != nil {
 							errChan <- fmt.Errorf("receiver service %s error: %v", rec.String(), err)
+							return
 						}
 						if translated != nil {
 							rec.AddMessage(translated)
@@ -98,6 +95,7 @@ func (s *Streamer) Stream(ctx context.Context, args ...receivers.Receiver) error
 	}()
 	select {
 	case <-ctx.Done():
+		log.Printf("Done Stream")
 		return nil
 	case err := <-errChan:
 		return err
